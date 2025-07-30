@@ -95,7 +95,7 @@ inline void getFilesSize(const boost::filesystem::path& root, long& file_size)
 }
 
 /** Boot config loader */
-static const std::string boot_config_file_name = "boot_config.json";
+static const std::string boot_config_file_name = "boot_config_NAO.json";
 inline std::string& getBootConfigFile()
 {
 #ifdef AMENT_BUILD
