@@ -6,14 +6,14 @@
     {
       "enabled"       : true,
       "resolution"    : 1,
-      "fps"           : 30,
+      "fps"           : 15,
       "recorder_fps"  : 0
     },
     "bottom_camera":
     {
-      "enabled"       : false,
+      "enabled"       : true,
       "resolution"    : 1,
-      "fps"           : 10,
+      "fps"           : 15,
       "recorder_fps"  : 0
     },
     "depth_camera":
