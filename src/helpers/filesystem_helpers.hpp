@@ -26,6 +26,8 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
+#include <cstdlib>
+
 #ifdef AMENT_BUILD
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #endif
@@ -95,9 +97,10 @@ inline void getFilesSize(const boost::filesystem::path& root, long& file_size)
 }
 
 /** Boot config loader */
-static const std::string boot_config_file_name = "boot_config_NAO.json";
 inline std::string& getBootConfigFile()
 {
+  const char* boot_config_env = std::getenv("NAOQI_DRIVER_BOOT_CONFIG_FILE");
+  static const std::string boot_config_file_name = boot_config_env ? boot_config_env : "boot_config_NAO.json";
 #ifdef AMENT_BUILD
   static std::string path = ament_index_cpp::get_package_share_directory("naoqi_driver") + "/share/" + boot_config_file_name;
   std::cout << "found an ament prefix " << path << std::endl;
