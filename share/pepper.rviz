@@ -6,9 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /TF1
-        - /Range1
-        - /Range2
+        - /DepthCloud1
       Splitter Ratio: 0.5
     Tree Height: 542
   - Class: rviz_common/Selection
@@ -822,7 +820,7 @@ Visualization Manager:
       Channel Name: intensity
       Class: rviz_default_plugins/DepthCloud
       Color: 255; 255; 255
-      Color Image Topic: ""
+      Color Image Topic: /camera/front/image_raw
       Color Transformer: RGB8
       Color Transport Hint: raw
       Decay Time: 0
@@ -937,10 +935,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.47539812326431274
+      Pitch: 0.2703986167907715
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.523585319519043
+      Yaw: 3.0485780239105225
     Saved: ~
 Window Geometry:
   Displays:
