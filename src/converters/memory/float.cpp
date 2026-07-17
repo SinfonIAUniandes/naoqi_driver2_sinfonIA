@@ -42,7 +42,6 @@ bool MemoryFloatConverter::convert()
   try
   {
     float value = p_memory_.call<float>("getData", memory_key_);
-    msg_.header.stamp = helpers::Time::now();
     msg_.data = value;
     success = true;
   }

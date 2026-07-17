@@ -27,7 +27,7 @@
 /*
 * ROS includes
 */
-#include <naoqi_bridge_msgs/msg/audio_buffer.hpp>
+#include <audio_common_msgs/msg/audio_data_stamped.hpp>
 
 /*
 * ALDEBARAN includes
@@ -41,7 +41,7 @@ namespace converter{
 class AudioEventConverter : public BaseConverter<AudioEventConverter>
 {
 
-  typedef boost::function<void(naoqi_bridge_msgs::msg::AudioBuffer&) > Callback_t;
+  typedef boost::function<void(audio_common_msgs::msg::AudioDataStamped&) > Callback_t;
 
 public:
   AudioEventConverter(const std::string& name, const float& frequency, const qi::SessionPtr& session);
@@ -53,12 +53,12 @@ public:
   void registerCallback(const message_actions::MessageAction action, Callback_t cb);
   void unregisterCallback(const message_actions::MessageAction action);
 
-  void callAll(const std::vector<message_actions::MessageAction>& actions, naoqi_bridge_msgs::msg::AudioBuffer& msg);
+  void callAll(const std::vector<message_actions::MessageAction>& actions, audio_common_msgs::msg::AudioDataStamped& msg);
 
 private:
   /** Registered Callbacks **/
   std::map<message_actions::MessageAction, Callback_t> callbacks_;
-  naoqi_bridge_msgs::msg::AudioBuffer msg_;
+  audio_common_msgs::msg::AudioDataStamped msg_;
 };
 
 }

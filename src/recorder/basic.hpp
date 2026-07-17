@@ -28,12 +28,28 @@
 * STANDARD includes
 */
 #include <string>
+#include <type_traits>
+#include <utility>
 #include <boost/circular_buffer.hpp>
 
 namespace naoqi
 {
 namespace recorder
 {
+
+template<typename T>
+class HasHeader
+{
+private:
+  template<typename U>
+  static auto test(int) -> decltype(std::declval<U>().header, std::true_type());
+
+  template<typename>
+  static std::false_type test(...);
+
+public:
+  static const bool value = decltype(test<T>(0))::value;
+};
 
 template<class T>
 class BasicRecorder
@@ -73,12 +89,7 @@ public:
 
   virtual void write(const T& msg)
   {
-    if (!helpers::recorder::isZero(msg.header.stamp)) {
-      gr_->write(topic_, msg, msg.header.stamp);
-    }
-    else {
-      gr_->write(topic_, msg);
-    }
+    writeImpl(msg, std::integral_constant<bool, HasHeader<T>::value>());
   }
 
   virtual void writeDump(const rclcpp::Time& time)
@@ -87,12 +98,7 @@ public:
     typename boost::circular_buffer<T>::iterator it;
     for (it = buffer_.begin(); it != buffer_.end(); it++)
     {
-      if (!helpers::recorder::isZero(it->header.stamp)) {
-        gr_->write(topic_, *it, it->header.stamp);
-      }
-      else {
-        gr_->write(topic_, *it);
-      }
+      writeImpl(*it, std::integral_constant<bool, HasHeader<T>::value>());
     }
   }
 
@@ -137,6 +143,21 @@ public:
   }
 
 protected:
+  void writeImpl(const T& msg, std::true_type)
+  {
+    if (!helpers::recorder::isZero(msg.header.stamp)) {
+      gr_->write(topic_, msg, msg.header.stamp);
+    }
+    else {
+      gr_->write(topic_, msg);
+    }
+  }
+
+  void writeImpl(const T& msg, std::false_type)
+  {
+    gr_->write(topic_, msg);
+  }
+
   std::string topic_;
 
   boost::circular_buffer<T> buffer_;

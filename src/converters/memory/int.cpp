@@ -43,7 +43,6 @@ bool MemoryIntConverter::convert()
   try
   {
     int value = p_memory_.call<int>("getData", memory_key_);
-    msg_.header.stamp = helpers::Time::now();
     msg_.data = value;
     success = true;
   }

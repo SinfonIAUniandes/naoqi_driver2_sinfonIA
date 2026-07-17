@@ -28,9 +28,7 @@
 #include <qi/session.hpp>
 
 #include <rclcpp/rclcpp.hpp>
-#include <naoqi_bridge_msgs/msg/bumper.hpp>
-#include <naoqi_bridge_msgs/msg/hand_touch.hpp>
-#include <naoqi_bridge_msgs/msg/head_touch.hpp>
+#include <sensor_msgs/msg/joy.hpp>
 
 #include <naoqi_driver/tools.hpp>
 #include <naoqi_driver/recorder/globalrecorder.hpp>
@@ -80,9 +78,7 @@ public:
 
 private:
   void touchCallback(const std::string &key, const qi::AnyValue &value);
-  void touchCallbackMessage(const std::string &key, bool &state, naoqi_bridge_msgs::msg::Bumper &msg);
-  void touchCallbackMessage(const std::string &key, bool &state, naoqi_bridge_msgs::msg::HandTouch &msg);
-  void touchCallbackMessage(const std::string &key, bool &state, naoqi_bridge_msgs::msg::HeadTouch &msg);
+  void touchCallbackMessage(const std::string &key, bool &state, sensor_msgs::msg::Joy &msg);
 
   void registerCallback();
   void unregisterCallback();
@@ -120,22 +116,22 @@ protected:
 }; // class
 
 
-class BumperEventRegister: public TouchEventRegister<naoqi_bridge_msgs::msg::Bumper>
+class BumperEventRegister: public TouchEventRegister<sensor_msgs::msg::Joy>
 {
 public:
-  BumperEventRegister( const std::string& name, const std::vector<std::string> keys, const float& frequency, const qi::SessionPtr& session ) : TouchEventRegister<naoqi_bridge_msgs::msg::Bumper>(name, keys, frequency, session) {}
+  BumperEventRegister( const std::string& name, const std::vector<std::string> keys, const float& frequency, const qi::SessionPtr& session ) : TouchEventRegister<sensor_msgs::msg::Joy>(name, keys, frequency, session) {}
 };
 
-class HeadTouchEventRegister: public TouchEventRegister<naoqi_bridge_msgs::msg::HeadTouch>
+class HeadTouchEventRegister: public TouchEventRegister<sensor_msgs::msg::Joy>
 {
 public:
-  HeadTouchEventRegister( const std::string& name, const std::vector<std::string> keys, const float& frequency, const qi::SessionPtr& session ) : TouchEventRegister<naoqi_bridge_msgs::msg::HeadTouch>(name, keys, frequency, session) {}
+  HeadTouchEventRegister( const std::string& name, const std::vector<std::string> keys, const float& frequency, const qi::SessionPtr& session ) : TouchEventRegister<sensor_msgs::msg::Joy>(name, keys, frequency, session) {}
 };
 
-class HandTouchEventRegister: public TouchEventRegister<naoqi_bridge_msgs::msg::HandTouch>
+class HandTouchEventRegister: public TouchEventRegister<sensor_msgs::msg::Joy>
 {
 public:
-  HandTouchEventRegister( const std::string& name, const std::vector<std::string> keys, const float& frequency, const qi::SessionPtr& session ) : TouchEventRegister<naoqi_bridge_msgs::msg::HandTouch>(name, keys, frequency, session) {}
+  HandTouchEventRegister( const std::string& name, const std::vector<std::string> keys, const float& frequency, const qi::SessionPtr& session ) : TouchEventRegister<sensor_msgs::msg::Joy>(name, keys, frequency, session) {}
 };
 
 } //naoqi

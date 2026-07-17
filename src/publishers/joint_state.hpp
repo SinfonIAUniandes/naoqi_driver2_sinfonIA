@@ -38,7 +38,7 @@ class JointStatePublisher
 {
 
 public:
-  JointStatePublisher( const std::string& topic = "/joint_states" );
+  JointStatePublisher( const std::string& topic = "joint_states" );
 
   inline std::string topic() const
   {

@@ -43,7 +43,6 @@ bool MemoryStringConverter::convert()
   try
   {
     std::string value = p_memory_.call<std::string>("getData", memory_key_);
-    msg_.header.stamp = helpers::Time::now();
     msg_.data = value;
     success = true;
   }

@@ -20,15 +20,18 @@
  */
 #include "teleop.hpp"
 
+#include <algorithm>
+#include <cmath>
+
 
 namespace naoqi
 {
 namespace subscriber
 {
 
-TeleopSubscriber::TeleopSubscriber( const std::string& name, const std::string& cmd_vel_topic, const std::string& joint_angles_topic, const qi::SessionPtr& session ):
+TeleopSubscriber::TeleopSubscriber( const std::string& name, const std::string& cmd_vel_topic, const std::string& joint_trajectory_topic, const qi::SessionPtr& session ):
   cmd_vel_topic_(cmd_vel_topic),
-  joint_angles_topic_(joint_angles_topic),
+  joint_trajectory_topic_(joint_trajectory_topic),
   BaseSubscriber( name, cmd_vel_topic, session ),
   p_motion_( session->service("ALMotion").value() )
 {}
@@ -40,10 +43,10 @@ void TeleopSubscriber::reset( rclcpp::Node* node )
     10,
     std::bind(&TeleopSubscriber::cmd_vel_callback, this, std::placeholders::_1));
 
-  sub_joint_angles_ = node->create_subscription<naoqi_bridge_msgs::msg::JointAnglesWithSpeed>(
-    joint_angles_topic_,
+  sub_joint_trajectory_ = node->create_subscription<trajectory_msgs::msg::JointTrajectory>(
+    joint_trajectory_topic_,
     10,
-    std::bind(&TeleopSubscriber::joint_angles_callback, this, std::placeholders::_1));
+    std::bind(&TeleopSubscriber::joint_trajectory_callback, this, std::placeholders::_1));
 
   is_initialized_ = true;
 }
@@ -59,16 +62,25 @@ void TeleopSubscriber::cmd_vel_callback( const geometry_msgs::msg::Twist::Shared
   p_motion_.async<void>("move", vel_x, vel_y, vel_th );
 }
 
-void TeleopSubscriber::joint_angles_callback( const naoqi_bridge_msgs::msg::JointAnglesWithSpeed::SharedPtr  js_msg )
+void TeleopSubscriber::joint_trajectory_callback( const trajectory_msgs::msg::JointTrajectory::SharedPtr trajectory_msg )
 {
-  if ( js_msg->relative==0 )
-  {
-    p_motion_.async<void>("setAngles", js_msg->joint_names, js_msg->joint_angles, js_msg->speed);
+  if (trajectory_msg->points.empty()) {
+    std::cerr << "Received empty joint trajectory" << std::endl;
+    return;
   }
-  else
-  {
-    p_motion_.async<void>("changeAngles", js_msg->joint_names, js_msg->joint_angles, js_msg->speed);
+
+  const auto& point = trajectory_msg->points.front();
+  if (trajectory_msg->joint_names.empty() || point.positions.size() != trajectory_msg->joint_names.size()) {
+    std::cerr << "Joint trajectory command must include matching joint_names and first-point positions" << std::endl;
+    return;
   }
+
+  float speed = 0.2f;
+  if (!point.velocities.empty()) {
+    speed = std::clamp(static_cast<float>(std::abs(point.velocities.front())), 0.0f, 1.0f);
+  }
+
+  p_motion_.async<void>("setAngles", trajectory_msg->joint_names, point.positions, speed);
 }
 
 } //publisher

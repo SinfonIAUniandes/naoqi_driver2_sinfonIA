@@ -42,7 +42,6 @@ bool MemoryBoolConverter::convert()
   bool success = false;
   try {
     bool value = p_memory_.call<bool>("getData", memory_key_);
-    msg_.header.stamp = helpers::Time::now();
     msg_.data = value;
     success = true;
   } catch (const std::exception& e) {

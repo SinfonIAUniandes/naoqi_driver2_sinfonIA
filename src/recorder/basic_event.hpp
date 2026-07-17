@@ -30,11 +30,27 @@
 * STANDARD includes
 */
 #include <string>
+#include <type_traits>
+#include <utility>
 
 namespace naoqi
 {
 namespace recorder
 {
+
+template<typename T>
+class HasEventHeader
+{
+private:
+  template<typename U>
+  static auto test(int) -> decltype(std::declval<U>().header, std::true_type());
+
+  template<typename>
+  static std::false_type test(...);
+
+public:
+  static const bool value = decltype(test<T>(0))::value;
+};
 
 template<class T>
 class BasicEventRecorder
@@ -72,12 +88,7 @@ public:
 
   virtual void write(const T& msg)
   {
-    if (!helpers::recorder::isZero(msg.header.stamp)) {
-      gr_->write(topic_, msg, msg.header.stamp);
-    }
-    else {
-      gr_->write(topic_, msg);
-    }
+    writeImpl(msg, std::integral_constant<bool, HasEventHeader<T>::value>());
   }
 
   virtual void writeDump(const rclcpp::Time& time)
@@ -87,12 +98,7 @@ public:
     typename std::list<T>::iterator it;
     for (it = buffer_.begin(); it != buffer_.end(); it++)
     {
-      if (!helpers::recorder::isZero(it->header.stamp)) {
-        gr_->write(topic_, *it, it->header.stamp);
-      }
-      else {
-        gr_->write(topic_, *it);
-      }
+      writeImpl(*it, std::integral_constant<bool, HasEventHeader<T>::value>());
     }
   }
 
@@ -118,7 +124,27 @@ public:
   }
 
 protected:
+  void writeImpl(const T& msg, std::true_type)
+  {
+    if (!helpers::recorder::isZero(msg.header.stamp)) {
+      gr_->write(topic_, msg, msg.header.stamp);
+    }
+    else {
+      gr_->write(topic_, msg);
+    }
+  }
+
+  void writeImpl(const T& msg, std::false_type)
+  {
+    gr_->write(topic_, msg);
+  }
+
   bool isTooOld(const T& msg)
+  {
+    return isTooOldImpl(msg, std::integral_constant<bool, HasEventHeader<T>::value>());
+  }
+
+  bool isTooOldImpl(const T& msg, std::true_type)
   {
     rclcpp::Duration d(helpers::Time::now() - msg.header.stamp);
     if (static_cast<float>(d.seconds()) > buffer_duration_)
@@ -128,13 +154,28 @@ protected:
     return false;
   }
 
+  bool isTooOldImpl(const T&, std::false_type)
+  {
+    return false;
+  }
+
   bool isOlderThan(const T& msg, const rclcpp::Time& time)
+  {
+    return isOlderThanImpl(msg, time, std::integral_constant<bool, HasEventHeader<T>::value>());
+  }
+
+  bool isOlderThanImpl(const T& msg, const rclcpp::Time& time, std::true_type)
   {
     rclcpp::Duration d(time - msg.header.stamp);
     if (static_cast<float>(d.seconds()) > buffer_duration_)
     {
       return true;
     }
+    return false;
+  }
+
+  bool isOlderThanImpl(const T&, const rclcpp::Time&, std::false_type)
+  {
     return false;
   }
 

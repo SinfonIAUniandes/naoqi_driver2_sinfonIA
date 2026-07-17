@@ -18,12 +18,14 @@
   <depend>rclcpp</depend>
   <depend>rclcpp_action</depend>
   <depend>action_msgs</depend>
+  <depend>audio_common_msgs</depend>
   <depend>cv_bridge</depend>
   <depend>image_transport</depend>
   <depend>kdl_parser</depend>
   <depend version_gte="2.0.0">naoqi_bridge_msgs</depend>
   <depend>naoqi_libqi</depend>
   <depend>naoqi_libqicore</depend>
+  <exec_depend>python3-yaml</exec_depend>
   <depend>robot_state_publisher</depend>
   <depend>tf2_ros</depend>
   <depend>boost</depend>
@@ -32,8 +34,13 @@
   <build_depend>diagnostic_updater</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>sensor_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
   <build_depend>tf2_geometry_msgs</build_depend>
   <build_depend>tf2_msgs</build_depend>
+  <build_depend>trajectory_msgs</build_depend>
+
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>trajectory_msgs</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

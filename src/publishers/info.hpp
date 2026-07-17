@@ -26,14 +26,14 @@
 /*
 * ROS includes
 */
-#include <naoqi_bridge_msgs/msg/string_stamped.hpp>
+#include <std_msgs/msg/string.hpp>
 
 namespace naoqi
 {
 namespace publisher
 {
 
-class InfoPublisher : public BasicPublisher<naoqi_bridge_msgs::msg::StringStamped>
+class InfoPublisher : public BasicPublisher<std_msgs::msg::String>
 {
 public:
   InfoPublisher(const std::string& topic) : BasicPublisher(topic)

@@ -27,9 +27,7 @@
 /*
 * ROS includes
 */
-#include <naoqi_bridge_msgs/msg/bumper.hpp>
-#include <naoqi_bridge_msgs/msg/hand_touch.hpp>
-#include <naoqi_bridge_msgs/msg/head_touch.hpp>
+#include <sensor_msgs/msg/joy.hpp>
 
 /*
 * ALDEBARAN includes

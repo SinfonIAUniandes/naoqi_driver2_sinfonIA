@@ -26,6 +26,7 @@
 
 #include <naoqi_driver/recorder/globalrecorder.hpp>
 #include <naoqi_driver/message_actions.h>
+#include <naoqi_driver/ros_helpers.hpp>
 
 #include "touch.hpp"
 
@@ -196,47 +197,20 @@ void TouchEventRegister<T>::touchCallback(const std::string &key, const qi::AnyV
 }
 
 template<class T>
-void TouchEventRegister<T>::touchCallbackMessage(const std::string &key, bool &state, naoqi_bridge_msgs::msg::Bumper &msg)
+void TouchEventRegister<T>::touchCallbackMessage(const std::string &key, bool &state, sensor_msgs::msg::Joy &msg)
 {
   int i = 0;
+  msg.header.stamp = helpers::Time::now();
+  msg.buttons.assign(keys_.size(), 0);
   for(std::vector<std::string>::const_iterator it = keys_.begin(); it != keys_.end(); ++it, ++i)
   {
     if ( key == it->c_str() ) {
-      msg.bumper = i;
-      msg.state = state?(naoqi_bridge_msgs::msg::Bumper::STATE_PRESSED):(naoqi_bridge_msgs::msg::Bumper::STATE_RELEASED);
-    }
-  }
-}
-
-template<class T>
-void TouchEventRegister<T>::touchCallbackMessage(const std::string &key, bool &state, naoqi_bridge_msgs::msg::HandTouch &msg)
-{
-  int i = 0;
-  for(std::vector<std::string>::const_iterator it = keys_.begin(); it != keys_.end(); ++it, ++i)
-  {
-    if ( key == it->c_str() ) {
-      msg.hand = i;
-      msg.state = state?(naoqi_bridge_msgs::msg::HandTouch::STATE_PRESSED):(naoqi_bridge_msgs::msg::HandTouch::STATE_RELEASED);
-    }
-  }
-}
-
-template<class T>
-void TouchEventRegister<T>::touchCallbackMessage(const std::string &key, bool &state, naoqi_bridge_msgs::msg::HeadTouch &msg)
-{
-  int i = 0;
-  for(std::vector<std::string>::const_iterator it = keys_.begin(); it != keys_.end(); ++it, ++i)
-  {
-    if ( key == it->c_str() ) {
-      msg.button = i;
-      msg.state = state?(naoqi_bridge_msgs::msg::HeadTouch::STATE_PRESSED):(naoqi_bridge_msgs::msg::HeadTouch::STATE_RELEASED);
+      msg.buttons[i] = state ? 1 : 0;
     }
   }
 }
 
 // http://stackoverflow.com/questions/8752837/undefined-reference-to-template-class-constructor
-template class TouchEventRegister<naoqi_bridge_msgs::msg::Bumper>;
-template class TouchEventRegister<naoqi_bridge_msgs::msg::HandTouch>;
-template class TouchEventRegister<naoqi_bridge_msgs::msg::HeadTouch>;
+template class TouchEventRegister<sensor_msgs::msg::Joy>;
 
 }//namespace

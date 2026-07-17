@@ -47,7 +47,7 @@ void AudioEventConverter::unregisterCallback( const message_actions::MessageActi
   callbacks_.erase(action);
 }
 
-void AudioEventConverter::callAll(const std::vector<message_actions::MessageAction>& actions, naoqi_bridge_msgs::msg::AudioBuffer& msg)
+void AudioEventConverter::callAll(const std::vector<message_actions::MessageAction>& actions, audio_common_msgs::msg::AudioDataStamped& msg)
 {
   msg_ = msg;
   for( message_actions::MessageAction action: actions )

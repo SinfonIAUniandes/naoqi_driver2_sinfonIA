@@ -18,6 +18,7 @@
 #ifndef AUDIO_EVENT_REGISTER_HPP
 #define AUDIO_EVENT_REGISTER_HPP
 
+#include <cstdint>
 #include <string>
 
 #include <boost/make_shared.hpp>
@@ -28,7 +29,9 @@
 #include <qi/session.hpp>
 
 #include <rclcpp/rclcpp.hpp>
-#include <naoqi_bridge_msgs/msg/audio_buffer.h>
+#include <audio_common_msgs/msg/audio_data_stamped.hpp>
+#include <audio_common_msgs/msg/audio_data.hpp>
+#include <audio_common_msgs/msg/audio_info.hpp>
 #include <naoqi_driver/ros_helpers.hpp>
 
 #include <naoqi_driver/tools.hpp>
@@ -59,7 +62,19 @@ public:
   /**
   * @brief Constructor for recorder interface
   */
-  AudioEventRegister( const std::string& name, const float& frequency, const qi::SessionPtr& session );
+  AudioEventRegister(
+    const std::string& name,
+    const std::string& stamped_name,
+    const std::string& info_name,
+    const float& frequency,
+    const qi::SessionPtr& session,
+    int sample_rate,
+    int channel_config,
+    bool deinterleaved,
+    uint8_t channels,
+    const std::string& sample_format,
+    uint32_t bitrate,
+    const std::string& coding_format );
   ~AudioEventRegister();
 
   void resetPublisher( rclcpp::Node* node );
@@ -84,13 +99,20 @@ private:
 
 private:
   qi::SessionPtr session_;
-  publisher::BasicPublisher<naoqi_bridge_msgs::msg::AudioBuffer> publisher_;
-  recorder::BasicEventRecorder<naoqi_bridge_msgs::msg::AudioBuffer> recorder_;
+  publisher::BasicPublisher<audio_common_msgs::msg::AudioData> audio_publisher_;
+  publisher::BasicPublisher<audio_common_msgs::msg::AudioDataStamped> stamped_publisher_;
+  rclcpp::Publisher<audio_common_msgs::msg::AudioInfo>::SharedPtr info_publisher_;
+  recorder::BasicEventRecorder<audio_common_msgs::msg::AudioDataStamped> recorder_;
   converter::AudioEventConverter converter_;
   qi::AnyObject p_audio_;
   qi::FutureSync<qi::AnyObject> p_audio_extractor_request;
   std::vector<uint8_t> channelMap;
   unsigned int serviceId;
+  std::string info_topic_;
+  int sample_rate_;
+  int channel_config_;
+  bool deinterleaved_;
+  audio_common_msgs::msg::AudioInfo audio_info_;
 
   boost::mutex subscription_mutex_;
   boost::mutex processing_mutex_;

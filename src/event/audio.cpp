@@ -31,18 +31,41 @@ namespace naoqi
 {
 static const std::string AUDIO_EXTRACTOR_NAME = "ROS-Driver-Audio";
 
-AudioEventRegister::AudioEventRegister( const std::string& name, const float& frequency, const qi::SessionPtr& session )
+AudioEventRegister::AudioEventRegister(
+  const std::string& name,
+  const std::string& stamped_name,
+  const std::string& info_name,
+  const float& frequency,
+  const qi::SessionPtr& session,
+  int sample_rate,
+  int channel_config,
+  bool deinterleaved,
+  uint8_t channels,
+  const std::string& sample_format,
+  uint32_t bitrate,
+  const std::string& coding_format )
   : session_(session),
-    publisher_(name),
-    recorder_(name),
+    audio_publisher_(name),
+    stamped_publisher_(stamped_name),
+    recorder_(stamped_name),
     converter_(name, frequency, session),
     p_audio_( session->service("ALAudioDevice").value()),
     serviceId(0),
+    info_topic_(info_name),
+    sample_rate_(sample_rate),
+    channel_config_(channel_config),
+    deinterleaved_(deinterleaved),
     isStarted_(false),
     isPublishing_(false),
     isRecording_(false),
     isDumping_(false)
 {
+  audio_info_.channels = channels;
+  audio_info_.sample_rate = sample_rate_;
+  audio_info_.sample_format = sample_format;
+  audio_info_.bitrate = bitrate;
+  audio_info_.coding_format = coding_format;
+
   // _getMicrophoneConfig is used for NAOqi < 2.9, _getConfigMap for NAOqi > 2.9
   int micConfig;
   auto robotModel = session->service("ALRobotModel").value();
@@ -69,7 +92,7 @@ AudioEventRegister::AudioEventRegister( const std::string& name, const float& fr
     channelMap.push_back(1);
     channelMap.push_back(4);
   }
-  converter_.registerCallback( message_actions::PUBLISH, [&](auto msg){ publisher_.publish(msg); });
+  converter_.registerCallback( message_actions::PUBLISH, [&](auto msg){ audio_publisher_.publish(msg.audio); stamped_publisher_.publish(msg); });
   converter_.registerCallback( message_actions::RECORD, [&](auto msg){ recorder_.write(msg); });
   converter_.registerCallback( message_actions::LOG, [&](auto msg){ recorder_.bufferize(msg); });
 }
@@ -84,7 +107,10 @@ AudioEventRegister::~AudioEventRegister()
 
 void AudioEventRegister::resetPublisher(rclcpp::Node* node)
 {
-  publisher_.reset(node);
+  audio_publisher_.reset(node);
+  stamped_publisher_.reset(node);
+  info_publisher_ = node->create_publisher<audio_common_msgs::msg::AudioInfo>(info_topic_, rclcpp::QoS(rclcpp::KeepLast(1)).transient_local());
+  info_publisher_->publish(audio_info_);
 }
 
 void AudioEventRegister::resetRecorder( boost::shared_ptr<naoqi::recorder::GlobalRecorder> gr )
@@ -103,9 +129,9 @@ void AudioEventRegister::startProcess()
       p_audio_.call<void>(
               "setClientPreferences",
               AUDIO_EXTRACTOR_NAME,
-              48000,
-              0,
-              0
+              sample_rate_,
+              channel_config_,
+              deinterleaved_ ? 1 : 0
               );
       p_audio_.call<void>("subscribe", AUDIO_EXTRACTOR_NAME);
       std::cout << "Audio Extractor: Start" << std::endl;
@@ -170,22 +196,22 @@ void AudioEventRegister::unregisterCallback()
 
 void AudioEventRegister::processRemote(int nbOfChannels, int samplesByChannel, qi::AnyValue altimestamp, qi::AnyValue buffer)
 {
-  naoqi_bridge_msgs::msg::AudioBuffer msg = naoqi_bridge_msgs::msg::AudioBuffer();
+  audio_common_msgs::msg::AudioDataStamped msg;
   msg.header.stamp = helpers::Time::now();
-  msg.frequency = 48000;
-  msg.channel_map = channelMap;
 
   std::pair<char*, size_t> buffer_pointer = buffer.asRaw();
 
   int16_t* remoteBuffer = (int16_t*)buffer_pointer.first;
   int bufferSize = nbOfChannels * samplesByChannel;
-  msg.data = std::vector<int16_t>(remoteBuffer, remoteBuffer+bufferSize);
+  const auto byteSize = bufferSize * static_cast<int>(sizeof(int16_t));
+  const auto* byteBuffer = reinterpret_cast<uint8_t*>(remoteBuffer);
+  msg.audio.data = std::vector<uint8_t>(byteBuffer, byteBuffer + byteSize);
 
   std::vector<message_actions::MessageAction> actions;
   boost::mutex::scoped_lock callback_lock(processing_mutex_);
   if (isStarted_) {
     // CHECK FOR PUBLISH
-    if ( isPublishing_ && publisher_.isSubscribed() )
+    if ( isPublishing_ && (audio_publisher_.isSubscribed() || stamped_publisher_.isSubscribed()) )
     {
       actions.push_back(message_actions::PUBLISH);
     }

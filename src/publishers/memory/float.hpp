@@ -26,20 +26,20 @@
 /*
 * ROS includes
 */
-#include <naoqi_bridge_msgs/msg/float_stamped.hpp>
+#include <std_msgs/msg/float32.hpp>
 
 namespace naoqi
 {
 namespace publisher
 {
 
-class MemoryFloatPublisher : public BasePublisher<naoqi_bridge_msgs::msg::FloatStamped>
+class MemoryFloatPublisher : public BasePublisher<std_msgs::msg::Float32>
 {
 
 public:
   MemoryFloatPublisher( const std::string& topic );
 
-  void publish( const naoqi_bridge_msgs::msg::FloatStamped& msg );
+  void publish( const std_msgs::msg::Float32& msg );
 
   void reset( rclcpp::Node* node );
 

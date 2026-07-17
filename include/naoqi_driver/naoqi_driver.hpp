@@ -252,6 +252,17 @@ private:
   /* boot config */
   boost::property_tree::ptree boot_config_;
   void loadBootConfig();
+  void applyBootConfigOverrides();
+
+  template <typename T>
+  void overrideBootConfigParameter(const std::string& key, const T& fallback_value)
+  {
+    const T default_value = boot_config_.get<T>(key, fallback_value);
+    this->declare_parameter<T>(key, default_value);
+    T value;
+    this->get_parameter(key, value);
+    boot_config_.put(key, value);
+  }
 
   void registerDefaultConverter();
   void registerDefaultSubscriber();

@@ -30,14 +30,14 @@ MemoryStringPublisher::MemoryStringPublisher( const std::string& topic ):
 {
 }
 
-void MemoryStringPublisher::publish( const naoqi_bridge_msgs::msg::StringStamped& msg )
+void MemoryStringPublisher::publish( const std_msgs::msg::String& msg )
 {
   pub_->publish( msg );
 }
 
 void MemoryStringPublisher::reset( rclcpp::Node* node )
 {
-  pub_ = node->create_publisher<naoqi_bridge_msgs::msg::StringStamped>( topic_, 10 );
+  pub_ = node->create_publisher<std_msgs::msg::String>( topic_, 10 );
   is_initialized_ = true;
 }
 

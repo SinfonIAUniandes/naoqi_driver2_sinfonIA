@@ -28,7 +28,7 @@
 /*
 * ROS includes
 */
-#include <naoqi_bridge_msgs/msg/bool_stamped.hpp>
+#include <std_msgs/msg/bool.hpp>
 
 namespace naoqi
 {
@@ -37,7 +37,7 @@ namespace converter
 
 class MemoryBoolConverter : public BaseConverter<MemoryBoolConverter>
 {
-  typedef boost::function<void(naoqi_bridge_msgs::msg::BoolStamped&)> Callback_t;
+  typedef boost::function<void(std_msgs::msg::Bool&)> Callback_t;
 
 public:
 
@@ -59,7 +59,7 @@ private:
   qi::AnyObject p_memory_;
 
   std::map<message_actions::MessageAction, Callback_t> callbacks_;
-  naoqi_bridge_msgs::msg::BoolStamped msg_;
+  std_msgs::msg::Bool msg_;
 
 }; // class
 

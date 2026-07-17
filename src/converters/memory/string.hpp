@@ -28,7 +28,7 @@
 /*
 * ROS includes
 */
-#include <naoqi_bridge_msgs/msg/string_stamped.hpp>
+#include <std_msgs/msg/string.hpp>
 
 namespace naoqi
 {
@@ -37,7 +37,7 @@ namespace converter
 
 class MemoryStringConverter : public BaseConverter<MemoryStringConverter>
 {
-  typedef boost::function<void(naoqi_bridge_msgs::msg::StringStamped&)> Callback_t;
+  typedef boost::function<void(std_msgs::msg::String&)> Callback_t;
 
 public:
 
@@ -59,7 +59,7 @@ private:
   qi::AnyObject p_memory_;
 
   std::map<message_actions::MessageAction, Callback_t> callbacks_;
-  naoqi_bridge_msgs::msg::StringStamped msg_;
+  std_msgs::msg::String msg_;
 
 }; // class
 
